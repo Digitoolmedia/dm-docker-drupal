@@ -1,4 +1,6 @@
-# This repo is going to have a docker-compose to deploy Drupal with nginx using the bitnami image
+# Drupal deploy
+
+This repo is going to have a docker-compose to deploy Drupal with nginx using the bitnami image
 
 
 Info will be added
