@@ -1,0 +1,83 @@
+version: '3.3'
+
+services:
+  drupal:
+    image: docker.io/bitnami/drupal-nginx:9
+
+    volumes:
+      - 'drupal_data:/bitnami/drupal'
+
+    networks:
+      - drupal-network
+      - traefik-public
+
+    tty: true
+    stdin_open: true
+
+    environment:
+      - DRUPAL_DATABASE_HOST=database
+      - DRUPAL_DATABASE_PORT_NUMBER=3306
+      - DRUPAL_DATABASE_NAME=${DB_NAME}
+      - DRUPAL_DATABASE_USER=${DB_USER}
+      - DRUPAL_DATABASE_PASSWORD=${DB_PASSWORD}
+      - DRUPAL_SITE_NAME=${PROJECT_NAME}
+      - DRUPAL_USERNAME=${ADMIN}
+      - DRUPAL_PASSWORD=${PASSWORD}
+
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 3s
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: 
+          - ${NODE_PLACEMENT}
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.${PROJECT_NAME}-drupal.rule=Host(`${DRUPAL_DOMAIN}`)"
+        - "traefik.http.routers.${PROJECT_NAME}-drupal.tls.certresolver=letsencrypt"
+        - "traefik.http.routers.${PROJECT_NAME}-drupal.entrypoints=websecure"
+        - "traefik.http.routers.${PROJECT_NAME}-drupal.service=${PROJECT_NAME}-drupal-svc"
+        - "traefik.http.services.${PROJECT_NAME}-drupal-svc.loadbalancer.server.port=443"
+
+
+
+  database:
+    image: docker.io/bitnami/mariadb:10.6
+
+    volumes:
+      - 'database_data:/bitnami/mariadb'
+
+    networks:
+      - drupal-network
+
+    tty: true
+    stdin_open: true
+
+    environment:
+      - MARIADB_DATABASE=${DB_NAME}
+      - MARIADB_USER=${DB_USER}
+      - MARIADB_PASSWORD=${DB_PASSWORD}
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 3s
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: 
+          - ${NODE_PLACEMENT}
+
+
+
+volumes:
+  database_data:
+    driver: local
+  drupal_data:
+    driver: local
+
+networks:
+  drupal-network:
+  traefik-public:
+    external: true
