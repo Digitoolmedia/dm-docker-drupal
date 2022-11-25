@@ -39,7 +39,7 @@ services:
         - "traefik.http.routers.${PROJECT_NAME}-drupal.tls.certresolver=letsencrypt"
         - "traefik.http.routers.${PROJECT_NAME}-drupal.entrypoints=websecure"
         - "traefik.http.routers.${PROJECT_NAME}-drupal.service=${PROJECT_NAME}-drupal-svc"
-        - "traefik.http.services.${PROJECT_NAME}-drupal-svc.loadbalancer.server.port=443"
+        - "traefik.http.services.${PROJECT_NAME}-drupal-svc.loadbalancer.server.port=80"
 
 
 
